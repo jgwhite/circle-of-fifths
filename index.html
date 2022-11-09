@@ -5,32 +5,63 @@
     <meta charset="utf-8" />
     <title>Circle of Fifths</title>
     <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+        margin: 0;
+      }
+      svg {
+        flex-shrink: 0;
+        flex-grow: 1;
+      }
       text {
         font-family: system-ui;
         font-weight: 600;
         font-size: 24px;
+        animation: fade-in 1s both;
+      }
+      path {
+        animation: fade-in 1s both;
+      }
+      @keyframes fade-in {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
       }
     </style>
   </head>
   <body>
     <script>
-      let radius = 256;
-      let d = radius * 2;
-      let notePadding = 40;
       let notes = [
         "Do",
-        "Sol",
+        "Do♯",
         "Re",
-        "La",
+        "Re♯",
         "Mi",
-        "Si",
-        "Fa♯",
-        "Re♭",
-        "La♭",
-        "Mi♭",
-        "Si♭",
         "Fa",
+        "Fa♯",
+        "Sol",
+        "Sol♯",
+        "La",
+        "La♯",
+        "Si",
       ];
+      let radius = 256;
+      let d = radius * 2;
+      let padding = 40;
+      let fifths = ["Do"];
+
+      while (fifths.length < 12) {
+        let a = fifths[fifths.length - 1];
+        let i = (notes.indexOf(a) + 7) % notes.length;
+        fifths.push(notes[i]);
+      }
 
       let svg = SVG("svg");
       svg.setAttribute("viewBox", `0 0 ${d} ${d}`);
@@ -39,14 +70,7 @@
       svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
       document.body.append(svg);
 
-      let circle = SVG("circle");
-      circle.setAttribute("cx", radius);
-      circle.setAttribute("cy", radius);
-      circle.setAttribute("r", radius);
-      circle.setAttribute("fill", "pink");
-      svg.append(circle);
-
-      notes.forEach((note, index) => {
+      fifths.forEach((note, index) => {
         let arc = SVG("path");
         let p1 = positionFor((index - 0.5) / 12, 0);
         let p2 = positionFor((index + 0.5) / 12, 0);
@@ -61,15 +85,16 @@
             Z
         `
         );
+        arc.style.animationDelay = `${0.125 + index / 12}s`;
 
         svg.append(arc);
       });
 
-      notes.forEach((note, index) => {
+      fifths.forEach((note, index) => {
         let t = SVG("text");
-        let p = positionFor(index / 12, notePadding);
+        let p = positionFor(index / 12, padding);
 
-        t.innerHTML = note;
+        t.innerHTML = index < 7 ? note : enharmonicFor(note);
 
         svg.append(t);
 
@@ -80,12 +105,13 @@
 
         t.setAttribute("x", p.x);
         t.setAttribute("y", p.y);
+        t.style.animationDelay = `${0.3 + index / 12}s`;
       });
 
       function positionFor(v, p = 0) {
         let r = radius - p;
-        let s = -Math.PI / 2;
-        let a = s + Math.PI * 2 * v;
+        let o = -Math.PI / 2;
+        let a = o + Math.PI * 2 * v;
         let x = r + p + Math.cos(a) * r;
         let y = r + p + Math.sin(a) * r;
 
@@ -97,20 +123,34 @@
       }
 
       function colorFor(note) {
-        return {
-          Do: "red",
-          Sol: "orange",
-          Re: "yellow",
-          La: "green",
-          Mi: "blue",
-          Si: "indigo",
-          "Fa♯": "violet",
-          "Re♭": "red",
-          "La♭": "orange",
-          "Mi♭": "yellow",
-          "Si♭": "green",
-          Fa: "blue",
-        }[note];
+        return (
+          {
+            Do: "#ef4444",
+            Sol: "#f97316",
+            Re: "#eab308",
+            La: "#84cc16",
+            Mi: "#22c55e",
+            Si: "#14b8a6",
+            "Fa♯": "#0ea5e9",
+            "Do♯": "#3b82f6",
+            "Sol♯": "#6366f1",
+            "Re♯": "#a855f7",
+            "La♯": "#d946ef",
+            Fa: "#ec4899",
+          }[note] || "pink"
+        );
+      }
+
+      function enharmonicFor(note) {
+        return (
+          {
+            "Do♯": "Re♭",
+            "Re♯": "Mi♭",
+            "Fa♯": "Sol♭",
+            "Sol♯": "La♭",
+            "La♯": "Si♭",
+          }[note] || note
+        );
       }
     </script>
   </body>
