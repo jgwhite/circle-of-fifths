@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Circle of Fifths</title>
+    <style>
+      text {
+        font-family: system-ui;
+        font-weight: 600;
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      let radius = 256;
+      let d = radius * 2;
+      let notePadding = 40;
+      let notes = [
+        "Do",
+        "Sol",
+        "Re",
+        "La",
+        "Mi",
+        "Si",
+        "Fa♯",
+        "Re♭",
+        "La♭",
+        "Mi♭",
+        "Si♭",
+        "Fa",
+      ];
+
+      let svg = SVG("svg");
+      svg.setAttribute("viewBox", `0 0 ${d} ${d}`);
+      svg.setAttribute("width", d);
+      svg.setAttribute("height", d);
+      svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      document.body.append(svg);
+
+      let circle = SVG("circle");
+      circle.setAttribute("cx", radius);
+      circle.setAttribute("cy", radius);
+      circle.setAttribute("r", radius);
+      circle.setAttribute("fill", "pink");
+      svg.append(circle);
+
+      notes.forEach((note, index) => {
+        let arc = SVG("path");
+        let p1 = positionFor((index - 0.5) / 12, 0);
+        let p2 = positionFor((index + 0.5) / 12, 0);
+
+        arc.setAttribute("fill", colorFor(note));
+        arc.setAttribute(
+          "d",
+          `
+            M ${p2.x} ${p2.y}
+            A ${radius} ${radius}, 0, 0, 0, ${p1.x} ${p1.y}
+            L ${radius} ${radius}
+            Z
+        `
+        );
+
+        svg.append(arc);
+      });
+
+      notes.forEach((note, index) => {
+        let t = SVG("text");
+        let p = positionFor(index / 12, notePadding);
+
+        t.innerHTML = note;
+
+        svg.append(t);
+
+        let rect = t.getBoundingClientRect();
+
+        p.x -= rect.width / 2;
+        p.y += rect.height / 4; // why 4?
+
+        t.setAttribute("x", p.x);
+        t.setAttribute("y", p.y);
+      });
+
+      function positionFor(v, p = 0) {
+        let r = radius - p;
+        let s = -Math.PI / 2;
+        let a = s + Math.PI * 2 * v;
+        let x = r + p + Math.cos(a) * r;
+        let y = r + p + Math.sin(a) * r;
+
+        return { x, y };
+      }
+
+      function SVG(...args) {
+        return document.createElementNS("http://www.w3.org/2000/svg", ...args);
+      }
+
+      function colorFor(note) {
+        return {
+          Do: "red",
+          Sol: "orange",
+          Re: "yellow",
+          La: "green",
+          Mi: "blue",
+          Si: "indigo",
+          "Fa♯": "violet",
+          "Re♭": "red",
+          "La♭": "orange",
+          "Mi♭": "yellow",
+          "Si♭": "green",
+          Fa: "blue",
+        }[note];
+      }
+    </script>
+  </body>
+</html>
