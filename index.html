@@ -53,7 +53,7 @@
         "Si",
       ];
       let radius = 256;
-      let d = radius * 2;
+      let diameter = radius * 2;
       let fifths = ["Do"];
 
       while (fifths.length < 12) {
@@ -63,16 +63,16 @@
       }
 
       let svg = SVG("svg");
-      svg.setAttribute("viewBox", `0 0 ${d} ${d}`);
-      svg.setAttribute("width", d);
-      svg.setAttribute("height", d);
+      svg.setAttribute("viewBox", `0 0 ${diameter} ${diameter}`);
+      svg.setAttribute("width", diameter);
+      svg.setAttribute("height", diameter);
       svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
       document.body.append(svg);
 
       fifths.forEach((note, index) => {
         let arc = SVG("path");
-        let p1 = positionFor((index - 0.5) / 12, 32);
-        let p2 = positionFor((index + 0.5) / 12, 32);
+        let p1 = positionFor((index - 0.5) / 12, 48);
+        let p2 = positionFor((index + 0.5) / 12, 48);
 
         arc.setAttribute("fill", colorFor(note));
         arc.setAttribute(
@@ -91,7 +91,7 @@
 
       fifths.forEach((note, index) => {
         let t = SVG("text");
-        let p = positionFor(index / 12, 64);
+        let p = positionFor(index / 12, 80);
 
         t.innerHTML = index < 7 ? note : enharmonicFor(note);
 
@@ -107,28 +107,33 @@
         t.style.animationDelay = `${0.3 + index / 12}s`;
       });
 
-      drawConnector(11, 2);
-      drawConnector(11, 3);
-      drawConnector(11, 4);
+      drawConnector(11, 7);
+      drawConnector(0, 6);
+      drawConnector(1, 5);
+      drawConnector(2, 4);
+      drawConnector(3, 3);
+      drawConnector(4, 2);
 
-      function drawConnector(a, d) {
-        let b = (a + d) % 12;
-        let p1 = positionFor(a / 12, 34);
-        let p2 = positionFor(b / 12, 34);
+      function drawConnector(a, delta) {
         let path = SVG("path");
+        let points = [];
+        for (let i = 0; i <= delta; i++) {
+          let padding = i === 0 || i === delta ? 0 : delta - 1;
+          points.push(positionFor(((a + i) % 12) / 12, 50 - padding * 4));
+        }
+        let d = points
+          .map((p, i) => `${i === 0 ? "M" : "T"} ${p.x},${p.y}`)
+          .join("\n");
 
-        path.setAttribute(
-          "d",
-          `
-            M ${p1.x},${p1.y}
-            L ${p2.x},${p2.y}
-          `
-        );
+        path.setAttribute("d", d);
         path.setAttribute("stroke", "black");
         path.setAttribute("stroke-linecap", "round");
         path.setAttribute("stroke-width", "2");
         path.setAttribute("fill", "none");
         svg.append(path);
+
+        let p1 = points.at(0);
+        let p2 = points.at(-1);
 
         let d1 = SVG("circle");
         d1.setAttribute("cx", p1.x);
