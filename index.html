@@ -54,7 +54,6 @@
       ];
       let radius = 256;
       let d = radius * 2;
-      let padding = 40;
       let fifths = ["Do"];
 
       while (fifths.length < 12) {
@@ -72,8 +71,8 @@
 
       fifths.forEach((note, index) => {
         let arc = SVG("path");
-        let p1 = positionFor((index - 0.5) / 12, 0);
-        let p2 = positionFor((index + 0.5) / 12, 0);
+        let p1 = positionFor((index - 0.5) / 12, 32);
+        let p2 = positionFor((index + 0.5) / 12, 32);
 
         arc.setAttribute("fill", colorFor(note));
         arc.setAttribute(
@@ -92,7 +91,7 @@
 
       fifths.forEach((note, index) => {
         let t = SVG("text");
-        let p = positionFor(index / 12, padding);
+        let p = positionFor(index / 12, 64);
 
         t.innerHTML = index < 7 ? note : enharmonicFor(note);
 
@@ -107,6 +106,42 @@
         t.setAttribute("y", p.y);
         t.style.animationDelay = `${0.3 + index / 12}s`;
       });
+
+      drawConnector(11, 2);
+      drawConnector(11, 3);
+      drawConnector(11, 4);
+
+      function drawConnector(a, d) {
+        let b = (a + d) % 12;
+        let p1 = positionFor(a / 12, 34);
+        let p2 = positionFor(b / 12, 34);
+        let path = SVG("path");
+
+        path.setAttribute(
+          "d",
+          `
+            M ${p1.x},${p1.y}
+            L ${p2.x},${p2.y}
+          `
+        );
+        path.setAttribute("stroke", "black");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("fill", "none");
+        svg.append(path);
+
+        let d1 = SVG("circle");
+        d1.setAttribute("cx", p1.x);
+        d1.setAttribute("cy", p1.y);
+        d1.setAttribute("r", 3);
+        svg.append(d1);
+
+        let d2 = SVG("circle");
+        d2.setAttribute("cx", p2.x);
+        d2.setAttribute("cy", p2.y);
+        d2.setAttribute("r", 3);
+        svg.append(d2);
+      }
 
       function positionFor(v, p = 0) {
         let r = radius - p;
